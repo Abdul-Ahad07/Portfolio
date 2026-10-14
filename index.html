@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Abdul Ahad — Creative Frontend Developer & Firebase Specialist</title>
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap">
+    <!-- GSAP Animation Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b0b0b;
+            --surface-color: #141414;
+            --text-color: #f3f0ea;
+            --muted-color: #888888;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            max-width: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* Preloader Styles */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loader-content {
+            text-align: center;
+        }
+
+        #counter {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(4rem, 15vw, 6rem);
+            font-weight: 800;
+            color: var(--text-color);
+            letter-spacing: -2px;
+        }
+
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid var(--text-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto 0;
+        }
+
+        #hello-text {
+            position: absolute;
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(3rem, 12vw, 5rem);
+            font-weight: 700;
+            color: var(--text-color);
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Main Container */
+        #main {
+            opacity: 0;
+            visibility: hidden;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        /* Header / Navigation */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 5vw;
+            border-bottom: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(11, 11, 11, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .desktop-nav {
+            display: flex;
+            gap: 30px;
+        }
+
+        .desktop-nav a {
+            color: var(--muted-color);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            transition: color 0.3s ease, transform 0.3s ease;
+            display: inline-block;
+        }
+
+        .desktop-nav a:hover {
+            color: var(--text-color);
+            transform: translateY(-2px);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .location-badge {
+            font-size: 0.75rem;
+            color: var(--muted-color);
+            background: var(--surface-color);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        /* Hamburger Button */
+        .hamburger-btn {
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 30px;
+            height: 18px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        .hamburger-btn span {
+            display: block;
+            width: 100%;
+            height: 2px;
+            background-color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .hamburger-btn.open span:nth-child(1) {
+            transform: translateY(8px) rotate(45deg);
+        }
+
+        .hamburger-btn.open span:nth-child(2) {
+            transform: translateY(-8px) rotate(-45deg);
+        }
+
+        /* Mobile Slide-out Menu */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            height: 100vh;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: right 0.4s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        .mobile-menu.active {
+            right: 0;
+        }
+
+        .mobile-nav-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .mobile-nav-links a {
+            font-family: 'Syne', sans-serif;
+            font-size: 2rem;
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 700;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .mobile-nav-links a:hover {
+            color: var(--muted-color);
+            transform: scale(1.05);
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 5vw;
+        }
+
+        .hero-title {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(2.5rem, 8vw, 8rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -2px;
+            text-transform: uppercase;
+            word-break: break-word;
+        }
+
+        .hero-title .outline {
+            -webkit-text-stroke: 2px var(--text-color);
+            color: transparent;
+            transition: color 0.3s ease;
+        }
+
+        .hero-title .outline:hover {
+            color: var(--text-color);
+        }
+
+        .hero-sub {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            color: var(--muted-color);
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+
+        .scroll-down {
+            position: absolute;
+            bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: var(--muted-color);
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+        }
+
+        .scroll-down .arrow {
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-6px); }
+            60% { transform: translateY(-3px); }
+        }
+
+        /* About Section */
+        .about-section {
+            padding: 100px 5vw;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .about-header h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            letter-spacing: 3px;
+            color: var(--muted-color);
+            margin-bottom: 50px;
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 50px;
+            align-items: center;
+        }
+
+        .about-img img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 8px;
+            filter: grayscale(100%);
+            transition: filter 0.5s ease, transform 0.5s ease;
+        }
+
+        .about-img img:hover {
+            filter: grayscale(0%);
+            transform: scale(1.02);
+        }
+
+        .about-content h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+
+        .bio-text {
+            color: var(--muted-color);
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 35px;
+        }
+
+        .about-meta {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 25px;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .meta-label {
+            font-size: 0.7rem;
+            color: var(--muted-color);
+            letter-spacing: 1.5px;
+        }
+
+        .meta-val {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        /* Expertise Section */
+        .expertise-section {
+            padding: 100px 5vw;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            margin-bottom: 60px;
+        }
+
+        .section-title h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(2rem, 4vw, 2.5rem);
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .section-title p {
+            color: var(--muted-color);
+            font-size: 1rem;
+        }
+
+        .expertise-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
+        }
+
+        .expertise-card {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            padding: 35px 25px;
+            border-radius: 8px;
+            transition: transform 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+        }
+
+        .expertise-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(255, 255, 255, 0.4);
+            background: #1a1a1a;
+        }
+
+        .expertise-card h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+        }
+
+        .expertise-card p {
+            color: var(--muted-color);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Work Section */
+        .work-section {
+            padding: 100px 5vw;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .projects-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .project-item {
+            display: grid;
+            grid-template-columns: 60px 1fr 2fr;
+            align-items: center;
+            padding: 35px 0;
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.3s ease, padding 0.3s ease, transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .project-item:hover {
+            padding-left: 15px;
+            padding-right: 15px;
+            background: var(--surface-color);
+            border-radius: 6px;
+            transform: scale(1.01);
+        }
+
+        .project-num {
+            font-family: 'Syne', sans-serif;
+            color: var(--muted-color);
+            font-size: 0.95rem;
+        }
+
+        .project-item h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .project-item p {
+            color: var(--muted-color);
+            font-size: 0.95rem;
+        }
+
+        /* Contact Section */
+        .contact-section {
+            padding: 100px 5vw;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .contact-container h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(1.8rem, 4vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .contact-container > p {
+            color: var(--muted-color);
+            font-size: 1rem;
+            margin-bottom: 50px;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 60px;
+        }
+
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 0.75rem;
+            letter-spacing: 1.5px;
+            color: var(--muted-color);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            padding: 14px;
+            border-radius: 6px;
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--text-color);
+            box-shadow: 0 0 8px rgba(243, 240, 234, 0.15);
+        }
+
+        .submit-btn {
+            background: var(--text-color);
+            color: var(--bg-color);
+            border: none;
+            padding: 15px 28px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            align-self: flex-start;
+        }
+
+        .submit-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-3px);
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .info-box {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            padding: 25px;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .info-box:hover {
+            transform: translateY(-3px);
+        }
+
+        .info-box span {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--muted-color);
+            letter-spacing: 1.5px;
+            margin-bottom: 6px;
+        }
+
+        .info-box a, .info-box p {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 600;
+            word-break: break-all;
+        }
+
+        .info-box a:hover {
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        footer {
+            padding: 35px 5vw;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--muted-color);
+            font-size: 0.8rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 900px) {
+            header {
+                padding: 20px 5vw;
+            }
+            .desktop-nav {
+                display: none;
+            }
+            .hamburger-btn {
+                display: flex;
+            }
+            .about-grid, .contact-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            .project-item {
+                grid-template-columns: 45px 1fr;
+                gap: 12px;
+            }
+            .project-item p {
+                grid-column: span 2;
+            }
+            .about-section, .expertise-section, .work-section, .contact-section {
+                padding: 70px 5vw;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Preloader Screen -->
+    <div id="preloader">
+        <div class="loader-content">
+            <h1 id="counter">0%</h1>
+            <div class="loader-spinner"></div>
+        </div>
+        <div id="hello-text">hello</div>
+    </div>
+
+    <!-- Main Container -->
+    <div id="main">
+        <!-- Header / Navigation -->
+        <header>
+            <div class="logo">Ahad.</div>
+            <nav class="desktop-nav">
+                <a href="#work">WORK</a>
+                <a href="#about">ABOUT</a>
+                <a href="#expertise">EXPERTISE</a>
+                <a href="#contact">CONTACT</a>
+            </nav>
+            <div class="header-right">
+                <div class="location-badge">
+                    <span>📍 Pakistan</span>
+                </div>
+                <!-- Mobile Hamburger Button -->
+                <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle Menu">
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Mobile Slide-out Menu -->
+        <div class="mobile-menu" id="mobileMenu">
+            <nav class="mobile-nav-links">
+                <a href="#work" class="mobile-link">WORK</a>
+                <a href="#about" class="mobile-link">ABOUT</a>
+                <a href="#expertise" class="mobile-link">EXPERTISE</a>
+                <a href="#contact" class="mobile-link">CONTACT</a>
+            </nav>
+        </div>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1 class="hero-title">CREATIVE <span class="outline">DEVELOPER</span></h1>
+            <div class="hero-sub">
+                <span>FRONTEND</span>
+                <span>•</span>
+                <span>FIREBASE</span>
+                <span>•</span>
+                <span>WORDPRESS</span>
+            </div>
+            <div class="scroll-down">
+                <span>SCROLL TO EXPLORE</span>
+                <div class="arrow">↓</div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="about-section">
+            <div class="about-header">
+                <h2>ABOUT ME</h2>
+            </div>
+            <div class="about-grid">
+                <div class="about-img">
+                    <img src="IMG-20261009-WA0005.jpg" alt="Abdul Ahad">
+                </div>
+                <div class="about-content">
+                    <h3>I BUILD DIGITAL WORLDS WHERE DESIGN MEETS CODE.</h3>
+                    <p class="bio-text">Hi, I'm Abdul Ahad — a passionate Frontend Developer and Firebase backend specialist. I bridge the gap between aesthetic UI/UX design and powerful serverless functionality, while actively expanding my skills in custom WordPress CMS development.</p>
+                    
+                    <div class="about-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">NAME</span>
+                            <span class="meta-val">Abdul Ahad</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">ROLE</span>
+                            <span class="meta-val">Frontend & Firebase</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">LEARNING</span>
+                            <span class="meta-val">WordPress CMS</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">LOCATION</span>
+                            <span class="meta-val">Pakistan</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Expertise Section -->
+        <section id="expertise" class="expertise-section">
+            <div class="section-title">
+                <h2>MY EXPERTISE</h2>
+                <p>I design and build digital experiences where design, code, and motion work as one.</p>
+            </div>
+            <div class="expertise-grid">
+                <div class="expertise-card">
+                    <h3>Creative Development</h3>
+                    <p>Building responsive, high-performance web applications with clean, modern code and seamless interactions.</p>
+                </div>
+                <div class="expertise-card">
+                    <h3>Motion & Interaction</h3>
+                    <p>Crafting engaging animations and fluid transitions using GSAP and modern JavaScript frameworks.</p>
+                </div>
+                <div class="expertise-card">
+                    <h3>Firebase Backend</h3>
+                    <p>Integrating secure user authentication, cloud Firestore databases, and real-time cloud-synced applications.</p>
+                </div>
+                <div class="expertise-card">
+                    <h3>WordPress CMS</h3>
+                    <p>Expanding expertise in custom WordPress solutions, theme customization, and dynamic content management.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Work Section -->
+        <section id="work" class="work-section">
+            <div class="section-title">
+                <h2>MY WORK</h2>
+                <p>A curated showcase of recent digital projects, web apps, and design systems.</p>
+            </div>
+            <div class="projects-list">
+                <div class="project-item">
+                    <span class="project-num">01</span>
+                    <h3>GAZU E-Commerce Platform</h3>
+                    <p>Modern clothing brand storefront featuring interactive product views and smooth checkout experience.</p>
+                </div>
+                <div class="project-item">
+                    <span class="project-num">02</span>
+                    <h3>Firebase Realtime Dashboard</h3>
+                    <p>Cloud-synced management system built with secure user authentication and live database integration.</p>
+                </div>
+                <div class="project-item">
+                    <span class="project-num">03</span>
+                    <h3>Luxury Timepieces Showcase</h3>
+                    <p>High-end interactive portfolio highlighting minimalist aesthetics and typography-driven layout.</p>
+                </div>
+                <div class="project-item">
+                    <span class="project-num">04</span>
+                    <h3>WordPress Custom Solutions</h3>
+                    <p>Tailored CMS website optimized for high performance, custom post types, and dynamic structure.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="contact-section">
+            <div class="contact-container">
+                <h2>LET'S CREATE SOMETHING MEANINGFUL.</h2>
+                <p>Have a project in mind, a question, or simply want to talk about code? I'd love to hear from you.</p>
+                
+                <div class="contact-grid">
+                    <form class="contact-form" onsubmit="event.preventDefault(); alert('Message sent successfully!');">
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" placeholder="Your name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" placeholder="your.email@example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Message</label>
+                            <textarea rows="4" placeholder="Tell me about your project..." required></textarea>
+                        </div>
+                        <button type="submit" class="submit-btn">Send Message ↗</button>
+                    </form>
+                    
+                    <div class="contact-info">
+                        <div class="info-box">
+                            <span>Email</span>
+                            <a href="mailto:abdulahad6217647@gmail.com">abdulahad6217647@gmail.com</a>
+                        </div>
+                        <div class="info-box">
+                            <span>LinkedIn</span>
+                            <a href="https://www.linkedin.com/in/orbenix-digital-11556a417" target="_blank">View Profile ↗</a>
+                        </div>
+                        <div class="info-box">
+                            <span>Based In</span>
+                            <p>Pakistan</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2026 Abdul Ahad. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Preloader Elements
+            const counterElement = document.getElementById("counter");
+            const preloader = document.getElementById("preloader");
+            const helloText = document.getElementById("hello-text");
+            const mainContent = document.getElementById("main");
+
+            let currentProgress = 0;
+
+            // Simulate loading percentage increment
+            const progressInterval = setInterval(() => {
+                currentProgress += Math.floor(Math.random() * 8) + 4;
+                
+                if (currentProgress >= 100) {
+                    currentProgress = 100;
+                    clearInterval(progressInterval);
+                    startPortfolioIntro();
+                }
+                
+                counterElement.textContent = currentProgress + "%";
+            }, 35);
+
+            // GSAP Animation Timeline for Preloader & Intro Transition
+            function startPortfolioIntro() {
+                const tl = gsap.timeline();
+
+                tl.to(".loader-content", {
+                    opacity: 0,
+                    duration: 0.4,
+                    ease: "power2.out"
+                })
+                .to(helloText, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.6,
+                    ease: "power3.out"
+                })
+                .to(helloText, {
+                    opacity: 0,
+                    y: -30,
+                    duration: 0.4,
+                    delay: 0.3,
+                    ease: "power2.in"
+                })
+                .to(preloader, {
+                    yPercent: -100,
+                    duration: 0.8,
+                    ease: "power4.inOut",
+                    onStart: () => {
+                        mainContent.style.visibility = "visible";
+                    }
+                })
+                .to(mainContent, {
+                    opacity: 1,
+                    duration: 0.8,
+                    ease: "power2.out"
+                }, "-=0.5");
+            }
+
+            // Mobile Hamburger Menu Toggle Logic
+            const hamburgerBtn = document.getElementById("hamburgerBtn");
+            const mobileMenu = document.getElementById("mobileMenu");
+            const mobileLinks = document.querySelectorAll(".mobile-link");
+
+            hamburgerBtn.addEventListener("click", () => {
+                mobileMenu.classList.toggle("active");
+                hamburgerBtn.classList.toggle("open");
+                document.body.style.overflow = mobileMenu.classList.contains("active") ? "hidden" : "auto";
+            });
+
+            // Close mobile menu when any link is clicked
+            mobileLinks.forEach(link => {
+                link.addEventListener("click", () => {
+                    mobileMenu.classList.remove("active");
+                    hamburgerBtn.classList.remove("open");
+                    document.body.style.overflow = "auto";
+                });
+            });
+        });
+    </script>
+</body>
+</html>
